@@ -1,17 +1,13 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
-
-
 using System;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using Prism.Events;
 
 namespace Prism.Tests.Events
 {
-    [TestClass]
     public class BackgroundEventSubscriptionFixture
     {
-        [TestMethod]
+        [Fact]
         public void ShouldReceiveDelegateOnDifferentThread()
         {
             ManualResetEvent completeEvent = new ManualResetEvent(false);
@@ -31,13 +27,13 @@ namespace Prism.Tests.Events
 
             var publishAction = eventSubscription.GetExecutionStrategy();
 
-            Assert.IsNotNull(publishAction);
+            Assert.NotNull(publishAction);
 
             publishAction.Invoke(null);
 
             completeEvent.WaitOne(5000);
             
-            Assert.AreNotEqual(SynchronizationContext.Current, calledSyncContext);
+            Assert.NotEqual(SynchronizationContext.Current, calledSyncContext);
         }
     }
 }

@@ -5,37 +5,46 @@ using Xamarin.Forms;
 
 namespace Prism.Navigation
 {
-    public class PageNavigationService : INavigationService
+    public class PageNavigationService : INavigationService, IPageAware
     {
-        internal Page Page { get; set; }
-
-        public void GoBack(NavigationParameters parameters = null, bool animated = true, bool useModalNavigation = true)
+        private Page _page;
+        Page IPageAware.Page
         {
-            var navigation = GetPageNavigation();
-
-            if (!CanNavigate(Page, parameters))
-                return;
-
-            OnNavigatedFrom(Page, parameters);
-
-            DoPop(navigation, useModalNavigation, animated);
-
-            //TODO: figure out how to call OnNavigatedTo on new page viewmodel after calling pop
+            get { return _page; }
+            set { _page = value; }
         }
 
-        public void Navigate(string name, NavigationParameters parameters = null, bool animated = true, bool useModalNavigation = true)
+        public void GoBack(bool useModalNavigation = true, bool animated = true)
+        {
+            //TODO: figure out how to reliably pass parameter to the target page after we have popped the current page
+            var navigation = GetPageNavigation();
+            DoPop(navigation, useModalNavigation, animated);
+        }
+
+        public void Navigate<T>(NavigationParameters parameters = null, bool useModalNavigation = true, bool animated = true)
+        {
+            Navigate(typeof(T).FullName, parameters, useModalNavigation, animated);
+        }
+
+        public void Navigate(string name, NavigationParameters parameters = null, bool useModalNavigation = true, bool animated = true)
         {
             var view = ServiceLocator.Current.GetInstance<object>(name) as Page;
             if (view != null)
             {
+                //TODO: I can automatically invoke the VML without the need for the developer to worry about it.
+                //TODO: but this would only work when using the NavigationFramework, and not when declaring Pages in another Page directly (think TabbedPage)
+                //TODO: so I am not sure I should do this.  Community thoughts?
+                //if (view.BindingContext == null)
+                //    ViewModelLocator.SetAutowireViewModel(view, true);
+
                 var navigation = GetPageNavigation();
 
-                if (!CanNavigate(Page, parameters))
+                if (!CanNavigate(_page, parameters))
                     return;
 
-                OnNavigatedFrom(Page, parameters);
+                OnNavigatedFrom(_page, parameters);
 
-                DoPush(navigation, view, animated, useModalNavigation);
+                DoPush(navigation, view, useModalNavigation, animated);
 
                 OnNavigatedTo(view, parameters);
             }
@@ -43,7 +52,7 @@ namespace Prism.Navigation
                 Debug.WriteLine("Navigation ERROR: {0} not found. Make sure you have registered {0} for navigation.", name);
         }
 
-        private async static void DoPush(INavigation navigation, Page view, bool animated, bool useModalNavigation)
+        private async static void DoPush(INavigation navigation, Page view, bool useModalNavigation, bool animated)
         {
             if (useModalNavigation)
                 await navigation.PushModalAsync(view, animated);
@@ -61,7 +70,7 @@ namespace Prism.Navigation
 
         private INavigation GetPageNavigation()
         {
-            return Page != null ? Page.Navigation : Application.Current.MainPage.Navigation;
+            return _page != null ? _page.Navigation : Application.Current.MainPage.Navigation;
         }
 
         protected static bool CanNavigate(object item, NavigationParameters parameters)

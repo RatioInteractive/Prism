@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
 
 using System.Linq;
 using Microsoft.Practices.ServiceLocation;
 using Microsoft.Practices.Unity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Prism.IocContainer.Wpf.Tests.Support.Mocks;
+using Prism.IocContainer.Wpf.Tests.Support.Mocks.Views;
 using Prism.Regions;
 using Prism.Unity.Wpf.Tests.Mocks;
 

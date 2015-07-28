@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
 
 using System;
 using System.Windows.Controls;
@@ -202,6 +202,107 @@ namespace Prism.Wpf.Tests.Interactivity
             commandAction.InvokeAction(eventArgs);
 
             Assert.AreEqual("testname", command.ExecuteParameter);
+        }
+
+        [TestMethod]
+        public void WhenAttachedAndCanExecuteReturnsTrue_ThenDisabledUIElementIsEnabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = false;
+
+            var command = new MockCommand();
+            command.CanExecuteReturnValue = true;
+            var commandAction = new InvokeCommandAction();
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsTrue(someControl.IsEnabled);
+        }
+
+        [TestMethod]
+        public void WhenAttachedAndCanExecuteReturnsFalse_ThenEnabledUIElementIsDisabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = true;
+
+            var command = new MockCommand();
+            command.CanExecuteReturnValue = false;
+            var commandAction = new InvokeCommandAction();
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsFalse(someControl.IsEnabled);
+        }
+
+        [TestMethod]
+        public void WhenAutoEnableIsFalse_ThenDisabledUIElementRemainsDisabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = false;
+
+            var command = new MockCommand();
+            command.CanExecuteReturnValue = true;
+            var commandAction = new InvokeCommandAction();
+            commandAction.AutoEnable = false;
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsFalse(someControl.IsEnabled);
+        }
+
+        [TestMethod]
+        public void WhenAutoEnableIsFalse_ThenEnabledUIElementRemainsEnabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = true;
+
+            var command = new MockCommand();
+            command.CanExecuteReturnValue = false;
+            var commandAction = new InvokeCommandAction();
+            commandAction.AutoEnable = false;
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsTrue(someControl.IsEnabled);
+        }
+
+        [TestMethod]
+        public void WhenAutoEnableIsUpdated_ThenDisabledUIElementIsEnabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = false;
+
+            var command = new MockCommand();
+            var commandAction = new InvokeCommandAction();
+            commandAction.AutoEnable = false;
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsFalse(someControl.IsEnabled);
+
+            commandAction.AutoEnable = true;
+
+            Assert.IsTrue(someControl.IsEnabled);
+        }
+
+        [TestMethod]
+        public void WhenAutoEnableIsUpdated_ThenEnabledUIElementIsDisabled()
+        {
+            var someControl = new TextBox();
+            someControl.IsEnabled = true;
+
+            var command = new MockCommand();
+            command.CanExecuteReturnValue = false;
+            var commandAction = new InvokeCommandAction();
+            commandAction.AutoEnable = false;
+            commandAction.Command = command;
+            commandAction.Attach(someControl);
+
+            Assert.IsTrue(someControl.IsEnabled);
+
+            commandAction.AutoEnable = true;
+
+            Assert.IsFalse(someControl.IsEnabled);
         }
     }
 

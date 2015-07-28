@@ -5,6 +5,9 @@ using Prism.Logging;
 using Prism.Mvvm;
 using Prism.Navigation;
 using Prism.Services;
+using Prism.Unity.Extensions;
+using Xamarin.Forms;
+using DependencyService = Prism.Services.DependencyService;
 
 namespace Prism.Unity
 {
@@ -28,7 +31,24 @@ namespace Prism.Unity
 
         protected override void ConfigureViewModelLocator()
         {
-            ViewModelLocationProvider.SetDefaultViewModelFactory((type) => Container.Resolve(type));
+            ViewModelLocationProvider.SetDefaultViewModelFactory((view, type) =>
+            {
+                ParameterOverrides overrides = null;
+
+                var page = view as Page;
+                if (page != null)
+                {
+                    var navService = new PageNavigationService();
+                    ((IPageAware)navService).Page = page;
+
+                    overrides = new ParameterOverrides
+                    {
+                        { "navigationService", navService }
+                    };
+                }
+
+                return Container.Resolve(type, overrides);
+            });
         }
 
         protected virtual void InitializeMainPage()
@@ -42,6 +62,8 @@ namespace Prism.Unity
 
         protected virtual void ConfigureContainer()
         {
+            Container.AddNewExtension<DependencyServiceExtension>();
+
             Container.RegisterInstance<ILoggerFacade>(Logger);
 
             Container.RegisterType<IEventAggregator, EventAggregator>(new ContainerControlledLifetimeManager());

@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation. All rights reserved. See License.txt in the project root for license information.
+
 
 using System.Collections.Generic;
 using System.Windows.Controls;
@@ -37,6 +37,15 @@ namespace Prism.Mef.Wpf.Tests
             bootstrapper.Run();
 
             Assert.IsTrue(Microsoft.Practices.ServiceLocation.ServiceLocator.Current is MefServiceLocatorAdapter);
+        }
+
+        [TestMethod]
+        public void RunShouldCallConfigureViewModelLocator()
+        {
+            var bootstrapper = new DefaultMefBootstrapper();
+            bootstrapper.Run();
+
+            Assert.IsTrue(bootstrapper.ConfigureViewModelLocatorCalled);
         }
 
         [TestMethod]
@@ -248,6 +257,16 @@ namespace Prism.Mef.Wpf.Tests
         }
 
         [TestMethod]
+        public void RunShouldLogAboutConfiguringViewModelLocator()
+        {
+            const string expectedMessageText = "Configuring the ViewModelLocator to use MEF";
+            var bootstrapper = new DefaultMefBootstrapper();
+            bootstrapper.Run();
+
+            Assert.IsTrue(bootstrapper.TestLog.LogMessages.Contains(expectedMessageText));
+        }
+
+        [TestMethod]
         public void RunShouldLogAboutConfiguringRegionAdapters()
         {
             const string expectedMessageText = "Configuring region adapters";
@@ -367,12 +386,13 @@ namespace Prism.Mef.Wpf.Tests
             Assert.AreEqual("CreateContainer", bootstrapper.MethodCalls[5]);
             Assert.AreEqual("ConfigureContainer", bootstrapper.MethodCalls[6]);
             Assert.AreEqual("ConfigureServiceLocator", bootstrapper.MethodCalls[7]);
-            Assert.AreEqual("ConfigureRegionAdapterMappings", bootstrapper.MethodCalls[8]);
-            Assert.AreEqual("ConfigureDefaultRegionBehaviors", bootstrapper.MethodCalls[9]);
-            Assert.AreEqual("RegisterFrameworkExceptionTypes", bootstrapper.MethodCalls[10]);
-            Assert.AreEqual("CreateShell", bootstrapper.MethodCalls[11]);
-            Assert.AreEqual("InitializeShell", bootstrapper.MethodCalls[12]);
-            Assert.AreEqual("InitializeModules", bootstrapper.MethodCalls[13]);
+            Assert.AreEqual("ConfigureViewModelLocator", bootstrapper.MethodCalls[8]);
+            Assert.AreEqual("ConfigureRegionAdapterMappings", bootstrapper.MethodCalls[9]);
+            Assert.AreEqual("ConfigureDefaultRegionBehaviors", bootstrapper.MethodCalls[10]);
+            Assert.AreEqual("RegisterFrameworkExceptionTypes", bootstrapper.MethodCalls[11]);
+            Assert.AreEqual("CreateShell", bootstrapper.MethodCalls[12]);
+            Assert.AreEqual("InitializeShell", bootstrapper.MethodCalls[13]);
+            Assert.AreEqual("InitializeModules", bootstrapper.MethodCalls[14]);
         }
     }
 
